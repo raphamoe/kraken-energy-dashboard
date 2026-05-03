@@ -45,6 +45,12 @@ If you prefer running without Docker:
 
 ---
 
+Once you're running, go to --> History, click on Settings, select a timeframe to which date you want to sync back your data (if any) and hit the Sync Button. Depending on the amount of data, it might take a few minutes.
+
+Hidden features:
+1. Force Update: In history, Shift-Click the Update button to force-sync your DB, overwriting any entries.
+2. Doubleclick on "Day" in the Energy Usage page to jump back to the current day. 
+
 ## ⚙️ Configuration (.env)
 
 Create a `.env` file in the root directory:
