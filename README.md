@@ -146,6 +146,8 @@ query GetUsage($deviceId: String!, $start: DateTime!, $end: DateTime!) {
 }
 ```
 
+You will also propably want to use different timezones and pricing symbols.
+
 ### Summary of the Tinkering Required:
 1. Update `.env` with the UK URL.
 2. Rewrite `GET_DAY_AHEAD_PRICES` to use `electricityAgreements`.
