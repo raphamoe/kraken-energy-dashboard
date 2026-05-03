@@ -67,3 +67,87 @@ DEFAULT_BASELINE=        # Standard price for savings comparison
 DEFAULT_FIXED_COST=      # Grid fees/taxes per kWh
 MONTHLY_FEE=             # Base monthly fee
 DEFAULT_TAXES=           # your added VAT
+
+
+---
+
+To switch your dashboard from the German Kraken platform to Octopus Energy UK, you will need to change both the API URL and the structure of your GraphQL queries. 
+
+Because Kraken is a global platform, the underlying architecture is the same, but the regional terminology (and database schema) differs slightly to match local energy market laws.
+
+### 1. The UK API Route
+First, update your `.env` file with the official UK GraphQL endpoint:
+```env
+KRAKEN_BASE_URL=[https://api.octopus.energy/v1/graphql/](https://api.octopus.energy/v1/graphql/)
+```
+
+### 2. The GraphQL Query Changes
+In Germany, energy grids use a "Marktlokation" (MaLo) to identify supply points, which is why your current `graphql_queries.py` uses the `electricityMalos` array. 
+
+In the UK, this concept doesn't exist. Instead, Octopus UK uses `electricityAgreements` and `electricityMeterPoints` directly attached to the account.
+
+You will need to open your `graphql_queries.py` and modify your queries to match the UK schema.
+
+#### Fetching Day-Ahead Prices (Agile/Dynamic Tariffs)
+To get your `unitRateForecast` in the UK, your query should bypass properties/malos and look directly at active agreements.
+
+**Change your price query to look something like this:**
+```graphql
+query getDayAheadPrices($accountNumber: String!) {
+  account(accountNumber: $accountNumber) {
+    electricityAgreements(active: true) {
+      tariff {
+        ... on HalfHourlyTariff {
+          unitRates {
+            validFrom
+            validTo
+            valueIncVat
+          }
+        }
+      }
+    }
+  }
+}
+```
+*(Note: You will also need to update `stats_service.py` to parse this new JSON path: `res["data"]["account"]["electricityAgreements"][0]["tariff"]["unitRates"]` instead of the old `electricityMalos` path).*
+
+#### Fetching Usage Data
+In the UK, querying live usage via GraphQL is typically done using the **Octopus Home Mini** device. If you have one, you query the `smartMeterTelemetry` endpoint. 
+
+First, you need your Home Mini's Device ID. You can find it by running this query once:
+```graphql
+query GetDeviceId($accountNumber: String!) {
+  account(accountNumber: $accountNumber) {
+    electricityAgreements(active: true) {
+      meterPoint {
+        meters(includeInactive: false) {
+          smartDevices {
+            deviceId
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Then, you update your `GET_USAGE` query in `graphql_queries.py` to fetch the actual consumption:
+```graphql
+query GetUsage($deviceId: String!, $start: DateTime!, $end: DateTime!) {
+  smartMeterTelemetry(
+    deviceId: $deviceId
+    grouping: HALF_HOURLY
+    start: $start
+    end: $end
+  ) {
+    readAt
+    consumptionDelta
+  }
+}
+```
+
+### Summary of the Tinkering Required:
+1. Update `.env` with the UK URL.
+2. Rewrite `GET_DAY_AHEAD_PRICES` to use `electricityAgreements`.
+3. Rewrite `GET_USAGE` to use `smartMeterTelemetry` (requires a Home Mini).
+4. Update `sync_service.py` to parse the new JSON paths returned by the UK queries.
