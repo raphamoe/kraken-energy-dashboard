@@ -23,8 +23,8 @@ api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 @api_bp.route("/prices")
 def api_prices():
-    # History page uses 'start' and 'end'[cite: 5]
-    # Dashboard uses 'date'[cite: 4]
+    # History page uses 'start' and 'end'
+    # Dashboard uses 'date'
     start_date = request.args.get("start") or request.args.get("date")
     end_date = request.args.get("end")  # If None, it treats as single-day
 
