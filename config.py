@@ -7,7 +7,7 @@ ENTSOE_API_KEY = os.getenv("ENTSOE_API_KEY")
 KRAKEN_EMAIL = os.getenv("KRAKEN_EMAIL")
 KRAKEN_PASSWORD = os.getenv("KRAKEN_PASSWORD")
 KRAKEN_ACCOUNT = os.getenv("KRAKEN_ACCOUNT")
-KRAKEN_URL = "https://api.oeg-kraken.energy/v1/graphql/"
+KRAKEN_URL = os.getenv("KRAKEN_URL")
 
 # Pendulum natively handles string timezones
 GERMANY_TZ = "Europe/Berlin"
