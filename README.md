@@ -4,6 +4,7 @@ A lightweight, bulletproof energy consumption and price tracking dashboard. Desi
 
 It fetches smart meter usage and dynamic work prices from the Kraken GraphQL API, day-ahead spot prices from ENTSO-E, and calculates costs and savings against a standard baseline tariff.
 
+
 ---
 
 ## ✨ Features at a Glance
@@ -17,6 +18,11 @@ It fetches smart meter usage and dynamic work prices from the Kraken GraphQL API
 ---
 
 ## 🚀 Getting Started
+
+1. Make sure you have access to the GERMAN Kraken GraphQL API. If you are a UK or customer from elsewhere, you're gonna have to do some changes first before running this. 
+2. Create a account here: https://transparency.entsoe.eu/
+3. Send an e-mail to transparency@entsoe.eu requesting access to their API. It can take a while before they set you up.
+4. Once you're setup, go to https://transparency.entsoe.eu/myAccount/webApiAccess , create an API Key. Note it down. You will need it.
 
 ### Option A: Docker (Recommended)
 The project includes a `Dockerfile` for easy deployment.
@@ -44,10 +50,10 @@ If you prefer running without Docker:
 Create a `.env` file in the root directory:
 ```env
 # --- API Keys & Accounts ---
-KRAKEN_EMAIL=
-KRAKEN_PASSWORD=
-KRAKEN_ACCOUNT=
-ENTSOE_API_KEY=
+KRAKEN_EMAIL=              # The E-mail to your Kraken Account
+KRAKEN_PASSWORD=           # Your Kraken login Password.
+KRAKEN_ACCOUNT=            # The Account ID, found in the Kraken Dashboard. Looks like this: A-123456789
+ENTSOE_API_KEY=            # The API Key you should have generated from Entso-E
 
 # --- Baseline & Tariff Settings ---
 DEFAULT_BASELINE=        # Standard price for savings comparison
