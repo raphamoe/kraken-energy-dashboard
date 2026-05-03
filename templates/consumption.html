@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Octopus Energy Consumption</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+  </head>
+  <body>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/history">History</a>
+      <a href="/statistics">Statistics</a>
+      <a href="/consumption" class="active">Energy Usage</a>
+    </nav>
+    <h1 class="page-title mt-20" id="pageTitle">Total Timeframe</h1>
+    <div class="card mt-20">
+      <div class="consumption-header">
+        <div class="segment-wrapper">
+          <input type="radio" name="timeToggle" id="modeDay" value="day" checked onclick="setMode('day')">
+          <label for="modeDay" ondblclick="snapToLatest()" class="no-select">Day</label>
+          <input type="radio" name="timeToggle" id="modeWeek" value="week" onclick="setMode('week')">
+          <label for="modeWeek">Week</label>
+          <input type="radio" name="timeToggle" id="modeMonth" value="month" onclick="setMode('month')">
+          <label for="modeMonth">Month</label>
+          <input type="radio" name="timeToggle" id="modeYear" value="year" onclick="setMode('year')">
+          <label for="modeYear">Year</label>
+          <input type="radio" name="timeToggle" id="modeCustom" value="custom" onclick="setMode('custom')">
+          <label for="modeCustom">📅</label>
+        </div>
+        <div>
+          <button class="btn-action" onclick="toggleSettings()">⚙️ Settings</button>
+        </div>
+        <div class="flex-gap-10">
+          <button class="btn-action btn-icon" onclick="shiftDate(-1)">❮</button>
+          <button class="btn-action btn-icon" onclick="shiftDate(1)">❯</button>
+        </div>
+      </div>
+      <div class="settings-content" id="settingsMenu">
+        <div class="settings-bar flex-center">
+          <div class="flex-center-gap">Cost Delta: <input type="number" id="fixedValue" class="input-short" value="0.000" step="0.001" oninput="handleSettingsChange()"> € </div>
+          <div class="flex-center-gap">Monthly Fee: <input type="number" id="monthlyFeeVal" class="input-short" value="{{ monthly_fee }}" step="0.01" oninput="handleSettingsChange()"> € </div>
+          <label class="flex-center-gap m-0" style="cursor: pointer;">
+            <input type="checkbox" id="includeFeeToggle" onchange="handleSettingsChange()"> Include Proportional Base Fee </label>
+          <button id="refreshBtn" class="btn-action" onclick="triggerRefresh()">🔄 Refresh Data</button>
+        </div>
+      </div>
+      <div id="customDatePanel">
+        <div>
+          <label class="input-label">Start Date</label>
+          <input type="date" id="customStart" max="{{ latest_date }}" onchange="fetchData()" class="calc-input">
+        </div>
+        <div>
+          <label class="input-label">End Date</label>
+          <input type="date" id="customEnd" max="{{ latest_date }}" onchange="fetchData()" class="calc-input">
+        </div>
+      </div>
+      <div class="consumption-summary-row">
+        <div>
+          <div class="consumption-title">
+            <span class="icon-kwh">⚡</span> Consumption
+          </div>
+          <div id="dateRangeDisplay" class="date-range-display">...</div>
+          <div class="consumption-total">
+            <span id="totalValue">0</span>
+            <span id="totalUnit" class="consumption-unit">kWh</span>
+          </div>
+        </div>
+        <div class="consumption-toggles">
+          <div class="segment-wrapper icon-toggle">
+            <input type="radio" name="viewToggle" id="viewGraph" checked onclick="setView('graph')">
+            <label for="viewGraph">📈</label>
+            <input type="radio" name="viewToggle" id="viewTable" onclick="setView('table')">
+            <label for="viewTable">📄</label>
+          </div>
+          <div class="flex-center">
+            <span id="labelKwh" class="active-text">kWh</span>
+            <label class="switch">
+              <input type="checkbox" id="unitToggle" onchange="toggleUnit()">
+              <span class="slider"></span>
+            </label>
+            <span id="labelEur" class="inactive-text">€</span>
+          </div>
+        </div>
+      </div>
+      <div id="chartContainer" class="chart-container chart-md">
+        <div id="noDataOverlay">No Data Available</div>
+        <canvas id="consumptionChart"></canvas>
+      </div>
+      <div id="tableContainer">
+        <table class="table-view">
+          <thead>
+            <tr>
+              <th class="text-left">Time</th>
+              <th>Usage (kWh)</th>
+              <th>Cost (€)</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const LATEST_DATE = "{{ latest_date }}";
+      const DEF_BASE = parseFloat("{{ monthly_fee }}") || 15.20;
+      if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    </script>
+    <script src="{{ url_for('static', filename='dayjs.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='consumption.js') }}"></script>
+  </body>
+</html>

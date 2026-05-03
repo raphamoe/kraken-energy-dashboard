@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Octopus Energy Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="active">Dashboard</a>
+      <a href="/history">History</a>
+      <a href="/statistics">Statistics</a>
+      <a href="/consumption">Energy Usage</a>
+    </nav>
+    <div class="dashboard-controls">
+      <div class="status-action-row">
+        <div class="segmented-control">
+          <input type="radio" name="dayToggle" id="dayToday" value="today" checked onclick="setTomorrow(false)">
+          <label for="dayToday">Today</label>
+          <input type="radio" name="dayToggle" id="dayTomorrow" value="tomorrow" onclick="setTomorrow(true)">
+          <label for="dayTomorrow" id="tomorrowLabel">Tomorrow</label>
+          <div class="selection-bg"></div>
+        </div>
+        <div class="live-status-bar">
+          <span id="statusPrefix">Current</span>
+          <span id="statusTime">(--:--)</span>: <span id="statusPrice">--.---- €</span>
+        </div>
+        <button class="collapse-btn m-0" onclick="toggleSettings()">⚙️ Settings</button>
+      </div>
+      <div class="settings-content" id="settingsMenu">
+        <div class="settings-bar flex-center">
+          <label>
+            <input type="checkbox" id="spotToggle" onchange="updateVisibility()" checked> Spot </label>
+          <label>
+            <input type="checkbox" id="workToggle" onchange="updateVisibility()" checked> Work </label>
+          <div class="flex-center-gap">Cost Delta: <input type="number" id="fixedValue" class="input-short" value="0.000" step="0.001" oninput="handleSettingsChange()">
+            <span id="simFixedDisplay" class="text-sm text-muted"></span>
+          </div>
+          <div>Base: <input type="number" id="baselineValue" class="input-short" value="{{ base_price }}" step="0.001" oninput="handleSettingsChange()"> € </div>
+          <button class="btn-action" id="refreshBtn" onclick="syncData()">🔄 Sync</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h2 id="chartTitle" class="chart-title">Today's Energy Prices</h2>
+        <div id="dailyStats" class="daily-stats">
+          <div>
+            <span class="text-muted">Avg:</span>
+            <span id="idxAvg" class="text-bold">--</span>
+          </div>
+          <div class="stat-col">
+            <div>
+              <span class="text-primary">Min:</span>
+              <span id="idxMin" class="text-bold">--</span>
+            </div>
+            <div id="idxMinTime" class="time-badge min-badge">--:--</div>
+          </div>
+          <div class="stat-col">
+            <div>
+              <span class="text-danger">Max:</span>
+              <span id="idxMax" class="text-bold">--</span>
+            </div>
+            <div id="idxMaxTime" class="time-badge max-badge">--:--</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="energyChart"></canvas>
+      </div>
+    </div>
+    <div class="card text-left mt-15">
+      <div class="grid-2-col">
+        <div>
+          <h3 class="section-title">💡 Best Time to Use Energy</h3>
+          <p class="section-subtitle">Cheapest continuous period below the daily average.</p>
+          <div class="opt-time-wrapper">
+            <span class="text-primary text-bold" id="optTime">--:-- to --:--</span>
+          </div>
+          <div class="text-md">Average Cost: <span class="text-bold" id="optPrice">-- €/kWh</span>
+          </div>
+        </div>
+        <div>
+          <h3 class="section-title">🧮 Cost Calculator</h3>
+          <div class="calc-controls">
+            <input type="time" id="calcStart" onchange="runCalculator()" class="calc-input">
+            <span class="text-muted">to</span>
+            <input type="time" id="calcEnd" onchange="runCalculator()" class="calc-input">
+            <div class="calc-input-group">
+              <input type="number" id="calcPower" placeholder="Power" step="0.1" oninput="runCalculator()" class="calc-input-naked">
+              <span class="calc-unit">kW</span>
+            </div>
+          </div>
+          <div class="calc-results">
+            <div>
+              <span class="text-muted">Usage:</span>
+              <span id="calcUsage" class="ml-5-bold">0.00 kWh</span>
+            </div>
+            <div>
+              <span class="text-muted">Cost:</span>
+              <span id="calcCost" class="ml-5-bold">0.00 €</span>
+            </div>
+            <div>
+              <span class="text-muted">Savings:</span>
+              <span id="calcSavings" class="ml-5-bold text-primary">0.00 €</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const BASE_FIXED = parseFloat("{{ fixed_cost }}") || 0.2115;
+      const TAXES = parseFloat("{{ taxes }}") || 1.19;
+      if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    </script>
+    <script src="{{ url_for('static', filename='dayjs.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+  </body>
+</html>

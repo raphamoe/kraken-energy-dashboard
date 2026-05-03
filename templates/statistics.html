@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Octopus Energy Statistics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+  </head>
+  <body>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/history">History</a>
+      <a href="/statistics" class="active">Statistics</a>
+      <a href="/consumption">Energy Usage</a>
+    </nav>
+    <div class="dashboard-controls mb-20">
+      <div class="status-action-col">
+        <button class="collapse-btn m-0" onclick="toggleSettings()">⚙️ Settings</button>
+        <div class="filter-nav m-0">
+          <button class="filter-btn active" id="btn-week" onclick="loadStats('week', this)">Current Week</button>
+          <button class="filter-btn" id="btn-month" onclick="loadStats('month', this)">Current Month</button>
+          <button class="filter-btn" id="btn-3months" onclick="loadStats('3months', this)">Last 3 Months</button>
+          <button class="filter-btn" id="btn-year" onclick="loadStats('year', this)">Current Year</button>
+          <button class="filter-btn" id="btn-all" onclick="loadStats('all', this)">All Time</button>
+          <button class="filter-btn" id="btn-custom" onclick="toggleCustomPanel(this)">Custom</button>
+        </div>
+      </div>
+      <div class="settings-content" id="settingsMenu">
+        <div class="settings-bar flex-center">
+          <div class="flex-center-gap">Cost Delta: <input type="number" id="deltaVal" class="input-short" value="0.000" step="0.001" oninput="handleSettingsChange()"> € <span id="simFixedDisplay" class="text-sm text-muted"></span>
+          </div>
+          <div class="flex-center-gap">Monthly Fee: <input type="number" id="monthlyFeeVal" class="input-short" value="{{ monthly_fee }}" step="0.01" oninput="handleSettingsChange()"> € </div>
+          <div>Baseline: <input type="number" id="baseVal" class="input-short" value="{{ base_price }}" step="0.001" oninput="handleSettingsChange()"> € </div>
+        </div>
+      </div>
+    </div>
+    <div class="custom-panel" id="customPanel">
+      <span class="text-muted text-bold">Custom Window:</span>
+      <input type="date" id="customStart" min="{{ oldest_date }}" max="{{ today_date }}" class="calc-input">
+      <span class="text-muted">to</span>
+      <input type="date" id="customEnd" min="{{ oldest_date }}" max="{{ today_date }}" class="calc-input">
+      <button class="btn-action btn-sm" onclick="applyCustomDate()">Apply</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Market Avg Price (Simple)</div>
+        <div class="stat-value" id="statMarketAvg">0.0000 €</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Weighted Avg Price (Your Pay)</div>
+        <div class="stat-value" id="statAvg">0.0000 €</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Bill (incl. Fee)</div>
+        <div class="stat-value text-accent" id="statTotalWithFee">0.00 €</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Daily Avg Usage</div>
+        <div class="stat-value" id="statDailyAvg">0.00 kWh</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Usage</div>
+        <div class="stat-value" id="statUsage">0.00 kWh</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Highest Price Paid</div>
+        <div class="stat-value text-danger" id="statMax">0.0000 €</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Lowest Price Paid</div>
+        <div class="stat-value text-primary" id="statMin">0.0000 €</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Bill</div>
+        <div class="stat-value text-accent" id="statCost">0.00 €</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Savings vs Baseline</div>
+        <div class="stat-value" id="statSavings">0.00 €</div>
+      </div>
+    </div>
+    <div class="download-section">
+      <div class="divider"></div>
+      <a href="/api/export_db" class="btn-download">📦 Download Database (ZIP)</a>
+    </div>
+    <script>
+      const BASE_FIXED = parseFloat("{{ fixed_cost }}") || 0.21;
+      const TAXES = parseFloat("{{ taxes }}") || 1.19;
+      const OLDEST_DATE = "{{ oldest_date }}";
+      const DEF_BASE = parseFloat("{{ monthly_fee }}") || 15.20;
+      if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    </script>
+    <script src="{{ url_for('static', filename='dayjs.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='statistics.js') }}"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+Flask
+requests
+pandas
+entsoe-py
+python-dotenv
+gunicorn
+pendulum>=3.0.0
+Flask-Compress

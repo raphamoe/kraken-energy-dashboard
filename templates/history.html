@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Price & Usage History Archive</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a1a">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+  </head>
+  <body>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/history" class="active">History</a>
+      <a href="/statistics">Statistics</a>
+      <a href="/consumption">Energy Usage</a>
+    </nav>
+    <div class="dashboard-controls">
+      <button class="collapse-btn" onclick="toggleSettings()">⚙️ Settings</button>
+      <div class="settings-content" id="settingsMenu">
+        <div class="settings-bar flex-center">
+          <div class="settings-group-border">
+            <label>
+              <input type="checkbox" id="workToggle" onchange="updateVisibility()" checked> Work </label>
+            <label>
+              <input type="checkbox" id="spotToggle" onchange="updateVisibility()" checked> Spot </label>
+            <label>
+              <input type="checkbox" id="usageToggle" onchange="updateVisibility()" checked> Usage </label>
+            <label>
+              <input type="checkbox" id="heatmapToggle" onchange="handleSettingsChange()" checked> Heatmap </label>
+          </div>
+          <div class="flex-center-gap">Monthly Fee: <input type="number" id="monthlyFeeVal" class="input-short" value="{{ monthly_fee }}" step="0.01" oninput="handleSettingsChange()"> € </div>
+          <label>
+            <input type="checkbox" id="includeFeeToggle" onchange="handleSettingsChange()"> Include Base Fee </label>
+          <div class="flex-center-gap">Cost Delta: <input type="number" id="fixedValue" class="input-short" value="0.000" step="0.001" oninput="handleSettingsChange()"> € <span id="simFixedDisplay" class="text-sm text-muted"></span>
+          </div>
+          <div>Base: <input type="number" id="baselineValue" class="input-short baseline-input" value="{{ base_price }}" step="0.001" oninput="handleSettingsChange()"> € </div>
+          <div class="flex-center-gap">
+            <div>Sync Back To: <input type="date" id="syncFromDate">
+            </div>
+            <button class="btn-action" onclick="syncHistory(event)">🔄 Sync Archive</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="archive-container"> {% for year, months in data.items() %} <div class="year-accordion-item">
+        <div class="year-accordion-header" onclick="toggleYearAccordion(this)">
+          <h2 class="year-title">{{ year }}</h2>
+          <div class="year-stats-label stats-label-right">
+            <span>Loading data...</span>
+          </div>
+        </div>
+        <div class="year-accordion-content"> {% for month, weeks in months.items() %} <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+              <span class="text-nowrap">📅 {{ month }} {{ year }}</span>
+              <span class="month-stats-label"></span>
+              <span>▼</span>
+            </div>
+            <div class="accordion-content"> {% for week_num, days in weeks.items() %} <div class="week-section">
+                <div class="week-header">
+                  <span>Week {{ week_num }}</span>
+                  <span class="week-stats-label"></span>
+                </div>
+                <div class="day-grid"> {% for day in days %} <div class="day-link" data-date="{{ day }}" onclick="showGraph('{{ day }}')">
+                    <script>
+                      (function() {
+                        const d = parseInt("{{day}}".split('-')[2]),
+                          s = ["th", "st", "nd", "rd"],
+                          v = d % 100;
+                        document.write(d + (s[(v - 20) % 10] || s[v] || s[0]));
+                      })();
+                    </script>
+                  </div> {% endfor %} </div>
+              </div> {% endfor %} </div>
+          </div> {% endfor %} </div>
+      </div> {% endfor %} </div>
+    <div id="hoverTooltip">
+      <div class="tt-row">
+        <span class="tt-label">Usage:</span>
+        <span class="tt-val usage" id="ttUsage">--</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Cost:</span>
+        <span class="tt-val cost" id="ttCost">--</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Avg:</span>
+        <span class="tt-val" id="ttAvg">--</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Min:</span>
+        <span class="tt-val text-primary" id="ttMin">--</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Max:</span>
+        <span class="tt-val text-danger" id="ttMax">--</span>
+      </div>
+      <div class="tt-row">
+        <span class="tt-label">Savings:</span>
+        <span class="tt-val" id="ttSavings">--</span>
+      </div>
+    </div>
+    <div id="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle" class="mb-10"></h2>
+        <div id="dailySummary" class="daily-summary">
+          <div>
+            <div class="summary-item-label">Usage</div>
+            <div id="sumUsage" class="summary-item-value text-yellow">0.00 kWh</div>
+          </div>
+          <div>
+            <div class="summary-item-label">Cost</div>
+            <div id="sumCost" class="summary-item-value text-green">0.00 €</div>
+          </div>
+          <div>
+            <div class="summary-item-label">Avg Work Price</div>
+            <div id="avgPrice" class="summary-item-value text-blue">0.00 €</div>
+          </div>
+          <div>
+            <div class="summary-item-label">Min Price</div>
+            <div id="minPrice" class="summary-item-value text-primary">0.00 €</div>
+          </div>
+          <div>
+            <div class="summary-item-label">Max Price</div>
+            <div id="maxPrice" class="summary-item-value text-danger">0.00 €</div>
+          </div>
+          <div>
+            <div class="summary-item-label">Savings</div>
+            <div id="daySavings" class="summary-item-value">0.00 €</div>
+          </div>
+        </div>
+        <div class="chart-container chart-md">
+          <canvas id="historyChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <script>
+      const BASE_FIXED = parseFloat("{{ fixed_cost }}") || 0.21;
+      const TAXES = parseFloat("{{ taxes }}") || 1.19;
+      const DEF_BASE = parseFloat("{{ monthly_fee }}") || 15.20;
+      if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+    </script>
+    <script src="{{ url_for('static', filename='dayjs.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='history.js') }}"></script>
+  </body>
+</html>
