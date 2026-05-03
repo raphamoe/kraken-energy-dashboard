@@ -79,7 +79,7 @@ Because Kraken is a global platform, the underlying architecture is the same, bu
 First, update your `.env` file with the official UK GraphQL endpoint:
 ```env
 KRAKEN_BASE_URL=[https://api.octopus.energy/v1/graphql/](https://api.octopus.energy/v1/graphql/)
-env
+```
 
 ### 2. The GraphQL Query Changes
 In Germany, energy grids use a "Marktlokation" (MaLo) to identify supply points, which is why your current `graphql_queries.py` uses the `electricityMalos` array. 
