@@ -1,4 +1,4 @@
-<img width="1204" height="1093" alt="grafik" src="https://github.com/user-attachments/assets/2abe6420-c694-4d50-917c-cd403dd1c909" /># 🐙 Kraken Energy Pi-Dashboard
+# 🐙 Kraken Energy Pi-Dashboard
 
 A lightweight, bulletproof energy consumption and price tracking dashboard. Designed as a "set-and-forget" appliance for low-power hardware like a Raspberry Pi. 
 
