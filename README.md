@@ -1,4 +1,4 @@
-# 🐙 Kraken Energy Pi-Dashboard
+<img width="1204" height="1093" alt="grafik" src="https://github.com/user-attachments/assets/2abe6420-c694-4d50-917c-cd403dd1c909" /># 🐙 Kraken Energy Pi-Dashboard
 
 A lightweight, bulletproof energy consumption and price tracking dashboard. Designed as a "set-and-forget" appliance for low-power hardware like a Raspberry Pi. 
 
@@ -153,3 +153,13 @@ You will also propably want to use different timezones and pricing symbols.
 2. Rewrite `GET_DAY_AHEAD_PRICES` to use `electricityAgreements`.
 3. Rewrite `GET_USAGE` to use `smartMeterTelemetry` (requires a Home Mini).
 4. Update `sync_service.py` to parse the new JSON paths returned by the UK queries.
+   
+---
+
+Preview:
+<img width="1204" height="1093" alt="grafik" src="https://github.com/user-attachments/assets/9b7a18c0-33f5-465f-9270-33001f5cfe9f" />
+<img width="1391" height="1034" alt="grafik" src="https://github.com/user-attachments/assets/1a48f73e-5cf0-4055-8584-e4ec54291529" />
+<img width="1288" height="945" alt="grafik" src="https://github.com/user-attachments/assets/2fb38749-c309-439c-8a2f-6765c29cc081" />
+<img width="1262" height="903" alt="grafik" src="https://github.com/user-attachments/assets/739c41f5-2b46-467a-be58-86705843fc3d" />
+
+
