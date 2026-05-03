@@ -53,6 +53,7 @@ Create a `.env` file in the root directory:
 KRAKEN_EMAIL=              # The E-mail to your Kraken Account
 KRAKEN_PASSWORD=           # Your Kraken login Password.
 KRAKEN_ACCOUNT=            # The Account ID, found in the Kraken Dashboard. Looks like this: A-123456789
+KRAKEN_URL=                # The URL to your countries specific Kraken API URL
 ENTSOE_API_KEY=            # The API Key you should have generated from Entso-E
 
 # --- Baseline & Tariff Settings ---
