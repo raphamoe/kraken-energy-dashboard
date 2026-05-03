@@ -2,7 +2,7 @@ import logging
 import pandas as pd
 import pendulum
 
-from config import GERMANY_TZ, KRAKEN_ACCOUNT
+from config import GERMANY_TZ, KRAKEN_ACCOUNT, KRAKEN_URL
 from database import fetch_one, bulk_insert, backup_db
 from clients import kraken, entsoe_client
 from utils import normalize_ts
