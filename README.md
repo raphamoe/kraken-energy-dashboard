@@ -158,11 +158,11 @@ You will also propably want to use different timezones and pricing symbols.
 
 Preview:
 <img width="1204" height="1093" alt="grafik" src="https://github.com/user-attachments/assets/9b7a18c0-33f5-465f-9270-33001f5cfe9f" />
-
+---
 <img width="1391" height="1034" alt="grafik" src="https://github.com/user-attachments/assets/1a48f73e-5cf0-4055-8584-e4ec54291529" />
-
+---
 <img width="1288" height="945" alt="grafik" src="https://github.com/user-attachments/assets/2fb38749-c309-439c-8a2f-6765c29cc081" />
-
+---
 <img width="1262" height="903" alt="grafik" src="https://github.com/user-attachments/assets/739c41f5-2b46-467a-be58-86705843fc3d" />
 
 
